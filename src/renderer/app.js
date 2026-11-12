@@ -130,13 +130,11 @@ let dmmRelBaseline = 0;
 let dmmAuto = true;
 let dmmBuzzerEnabled = true;
 let dmmLoggerRunning = true;
-let dmmLogRate = 250;
 let dmmTimeWindow = 60; // seconds
 
 let dmmHistory = [];
 let dmmStats = { min: null, max: null, count: 0, sum: 0 };
 let dmmLogCounter = 0;
-let dmmLogTimer = null;
 
 // Audio Buzzer for Continuity (Web Audio API)
 let audioCtx = null;
@@ -198,13 +196,10 @@ const btnDmmRange = document.getElementById('btnDmmRange');
 const btnDmmResetStats = document.getElementById('btnDmmResetStats');
 const btnDmmBuzzer = document.getElementById('btnDmmBuzzer');
 
-const rngDmmSim = document.getElementById('rngDmmSim');
-const lblSimValue = document.getElementById('lblSimValue');
 const btnDmmRun = document.getElementById('btnDmmRun');
 const btnDmmExportCsv = document.getElementById('btnDmmExportCsv');
 const btnDmmClearLogger = document.getElementById('btnDmmClearLogger');
 
-const selDmmRate = document.getElementById('selDmmRate');
 const selDmmWindow = document.getElementById('selDmmWindow');
 const dmmCanvas = document.getElementById('dmmCanvas');
 const dmmCtx = dmmCanvas ? dmmCanvas.getContext('2d') : null;
@@ -240,8 +235,6 @@ document.querySelectorAll('.btn-dmm-mode').forEach(btn => {
     if (window.api && window.api.sendDmmCommand) {
       window.api.sendDmmCommand('MODE:' + dmmMode);
     }
-
-    updateDmmReading();
   });
 });
 
@@ -305,11 +298,6 @@ btnDmmClearLogger?.addEventListener('click', () => {
   resetDmmStats();
   renderDmmCanvas();
   showToast('Datenlogger geleert');
-});
-
-selDmmRate?.addEventListener('change', (e) => {
-  dmmLogRate = parseInt(e.target.value, 10);
-  restartDmmLogLoop();
 });
 
 selDmmWindow?.addEventListener('change', (e) => {
@@ -417,13 +405,6 @@ function applyDmmReadingToUi(reading) {
 
     renderDmmCanvas();
   }
-}
-
-// Update DMM UI & Logger (Simulation Loop)
-function updateDmmReading() {
-  if (isLiveSerialConnected) return;
-  const reading = calculateDmmValue();
-  applyDmmReadingToUi(reading);
 }
 
 // Render Real-time Trend Canvas
@@ -540,16 +521,6 @@ function renderDmmCanvas() {
   dmmCtx.fill();
   dmmCtx.shadowBlur = 0;
 }
-
-// Realtime Timer loop for DMM
-function restartDmmLogLoop() {
-  if (dmmLogTimer) clearInterval(dmmLogTimer);
-  dmmLogTimer = setInterval(updateDmmReading, dmmLogRate);
-}
-restartDmmLogLoop();
-
-// Listener on simulation range slider
-rngDmmSim?.addEventListener('input', updateDmmReading);
 
 // ==========================================
 // 0.1 LIVE USB-CDC SERIAL TELEMETRY STREAM
